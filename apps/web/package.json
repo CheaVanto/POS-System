@@ -1,0 +1,21 @@
+{
+  "name": "pos-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --port 3001",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview --port 3001",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.7.0",
+    "axios": "^1.7.7",
+    "dayjs": "^1.11.13",
+    "nuxt": "^3.14.1592",
+    "pinia": "^2.2.6",
+    "vue": "^3.5.13",
+    "vue3-toastify": "^0.2.8"
+  }
+}

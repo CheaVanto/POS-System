@@ -1,0 +1,33 @@
+server:
+  port: ${SERVER_PORT:4000}
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: pos-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/pos}
+    username: ${DB_USER:cheavanto}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      # Prisma owns the schema; Hibernate only maps to it.
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        # Preserve Prisma's PascalCase tables / camelCase columns.
+        globally_quoted_identifiers: true
+    open-in-view: false
+
+app:
+  jwt:
+    access-secret: ${JWT_ACCESS_SECRET:dev_access_secret_change_me}
+    refresh-secret: ${JWT_REFRESH_SECRET:dev_refresh_secret_change_me}
+    access-ttl-seconds: ${JWT_ACCESS_TTL:900}
+    refresh-ttl-seconds: ${JWT_REFRESH_TTL:1209600}
+  cors:
+    # Any localhost origin is allowed in dev (matches the TS backend fix).
+    allowlist: ${CORS_ORIGINS:http://localhost:3001,http://localhost:3000}

@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pos_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-pos}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pos}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      API_PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-pos}:${POSTGRES_PASSWORD:-pos_secret}@postgres:5432/${POSTGRES_DB:-pos}?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_me}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_me}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-900}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-1209600}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3001}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    # For local dev prefer `npm run start:dev` from apps/api; this service is for staging/prod images.
+    profiles: ["full"]
+
+volumes:
+  pg_data:
+  redis_data:
